@@ -1,15 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Bell, 
-  ChevronLeft,
-  Plus,
-  Trash2,
-} from 'lucide-react';
+
 import CreatePostPage from './pages/create';
 import NavBar from './components/NavBar';
 import Main from './pages/main';
 import Article from './pages/article';
-import { Route, Routes } from 'react-router-dom';
+import HomePage from './pages/home';
+
+
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { useClerk, useUser } from '@clerk/clerk-react';
+import { useEffect } from 'react';
+
+
+ function ProtectedRoute({ children }) {
+  const { isSignedIn, isLoaded } = useUser();
+  const { openSignIn } = useClerk();
+  const navigate = useNavigate();
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      openSignIn({
+        mode: "modal",
+
+        // If user closes the modal → go back
+        onClose: () => {
+          navigate(-1);
+        },
+
+      });
+    }
+  }, [isLoaded, isSignedIn, openSignIn, navigate,]);
+
+  if (!isLoaded) return <Navigate to="/" />;
+
+  // Block page access while modal is open
+  if (!isSignedIn) return <Navigate to="/" />;;
+
+  return children;
+}
 
 const App = () => {
   
@@ -19,8 +48,13 @@ const App = () => {
 
       <main className="pt-24 pb-20">
         <Routes>
+          <Route path='/home' element={<HomePage/>}/>
+          <Route path='/create' element={
+            <ProtectedRoute>
+              <CreatePostPage/>
+            </ProtectedRoute>
+          }/>
           <Route path='/' element={<Main/>}/>
-          <Route path='/create' element={<CreatePostPage/>}/>
           <Route path='/article/:id' element={<Article/>}/>
         </Routes>
 

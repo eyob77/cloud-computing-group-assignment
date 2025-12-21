@@ -1,3 +1,4 @@
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/clerk-react";
 import { Bell, Plus } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -8,7 +9,6 @@ const NavBar=()=>{
   const navigate = useNavigate();
   
   
-  const [scrollProgress, setScrollProgress] = useState(0);
   
   const handleBack = () => {
     navigate("/");
@@ -47,7 +47,26 @@ const NavBar=()=>{
               </div>
             )}
             <Bell className="w-5 h-5 cursor-pointer hover:text-black transition-colors" />
-            <div className="w-8 h-8 bg-gray-200 rounded-full cursor-pointer hover:opacity-80 transition-opacity"></div>
+            <div className="flex items-center ">
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="px-4 py-1.5 bg-black text-white rounded-sm text-xs hover:opacity-80 transition-opacity">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="ml-4 px-4 py-1.5 border border-black text-black rounded-sm text-xs hover:opacity-80 transition-opacity">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </SignedOut>
+
+              <SignedIn>
+                <div className="w-8 h-8 bg-gray-200 rounded-full cursor-pointer hover:opacity-80 transition-opacity flex items-center justify-center">
+                  <UserButton/>
+                </div>
+              </SignedIn>
+            </div>
           </div>
         </div>
         

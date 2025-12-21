@@ -8,9 +8,7 @@ const Article=()=>{
   const navigate = useNavigate();
   
   const selectedPost = mockData.find(d=> d.id.toString() === id);
-  
 
-    
 
     const handleBack = () => {
       navigate("/")
