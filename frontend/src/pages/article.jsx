@@ -6,26 +6,9 @@ import mockData from "../mockData.json"
 const Article=()=>{
   const {id} = useParams();
   const navigate = useNavigate();
-  const [scrollProgress, setScrollProgress] = useState(0);
-  // const [selectedPost, setSelectedPost] = useState(null);
-  // useEffect(()=>{
-  //   const data = mockData.find(d=> d.id.toString() === id);
-  //   console.log(data)
-  //   setSelectedPost(data)
-  // },[])
+  
   const selectedPost = mockData.find(d=> d.id.toString() === id);
   
-  useEffect(() => {
-      const handleScroll = () => {
-        const totalScroll = document.documentElement.scrollTop;
-        const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scroll = `${(totalScroll / windowHeight) * 100}%`;
-        setScrollProgress(scroll);
-      };
-  
-      window.addEventListener('scroll', handleScroll);
-      return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     
 

@@ -1,7 +1,8 @@
-import { Heading, ImageIcon, List, TableIcon, TextQuote, Trash2, Type, Upload } from "lucide-react";
-import { useState } from "react";
+import { Heading, ImageIcon, List, TableIcon, TextQuote, Trash2, Type, Upload, X } from "lucide-react";
+import { useRef, useState } from "react";
 
 const CreatePostPage=()=>{
+  const fileInputRef = useRef(null);
   const [activeUploadBlock, setActiveUploadBlock] = useState(null);
   const [newPost, setNewPost] = useState({
       title: '',
@@ -65,30 +66,7 @@ const CreatePostPage=()=>{
         const items = block.content.split('\n').filter(i => i.trim() !== '');
         return `<ul class="list-disc list-outside ml-6 space-y-2 my-4 font-serif text-xl">${items.map(item => `<li>${item}</li>`).join('')}</ul>`;
       }
-      if (block.type === 'table') {
-        const rows = block.content.split('\n').map(row => row.split(',').map(cell => cell.trim()));
-        if (rows.length === 0) return '';
-        const header = rows[0];
-        const body = rows.slice(1);
-        return `
-          <div class="overflow-x-auto my-8">
-            <table class="w-full text-left border-collapse font-serif text-lg">
-              <thead>
-                <tr class="border-b-2 border-gray-100">
-                  ${header.map(h => `<th class="py-3 font-bold">${h}</th>`).join('')}
-                </tr>
-              </thead>
-              <tbody>
-                ${body.map(row => `
-                  <tr class="border-b border-gray-50">
-                    ${row.map(cell => `<td class="py-3 text-gray-600">${cell}</td>`).join('')}
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        `;
-      }
+      
       return `<p class="font-serif text-xl mb-6 text-gray-800">${block.content.replace(/\n/g, '<br/>')}</p>`;
     }).join('');
 
@@ -104,26 +82,33 @@ const CreatePostPage=()=>{
       content: htmlContent
     };
 
-    setPosts([createdPost, ...posts]);
+    
     setNewPost({ title: '', description: '', blocks: [{ id: Date.now().toString(), type: 'text', content: '' }], category: 'Draft' });
-    setView('home');
+    console.log("Published Post:", createdPost);
   };
 
   return(
   
               <div className="max-w-2xl mx-auto px-4 mt-10">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                />
                 <div className="mb-10">
                   <input 
                     type="text"
                     placeholder="Title"
-                    className="w-full text-4xl md:text-5xl font-serif font-bold border-none focus:ring-0 placeholder:text-gray-100 mb-2 text-black"
+                    className="w-full text-4xl md:text-5xl font-serif font-bold border-none focus:ring-3 focus:p-4 focus:ring-gray-300 focus:rounded placeholder:text-gray-100 mb-2 text-black"
                     value={newPost.title}
                     onChange={(e) => setNewPost({...newPost, title: e.target.value})}
                   />
                   <input 
                     type="text"
                     placeholder="Short description..."
-                    className="w-full text-xl font-serif text-gray-500 border-none focus:ring-0 placeholder:text-gray-100 italic"
+                    className="w-full text-xl font-serif text-gray-500 border-none focus:ring-3 focus:p-4 focus:ring-gray-300 focus:rounded placeholder:text-gray-100 italic"
                     value={newPost.description}
                     onChange={(e) => setNewPost({...newPost, description: e.target.value})}
                   />
@@ -147,7 +132,7 @@ const CreatePostPage=()=>{
                         {block.type === 'text' && (
                           <textarea 
                             placeholder="Tell your story..."
-                            className="w-full text-xl font-serif border-none focus:ring-0 placeholder:text-gray-200 resize-none overflow-hidden min-h-10 bg-transparent text-gray-800"
+                            className="w-full text-xl font-serif border-none focus:ring-3 focus:p-4 focus:ring-gray-300 focus:rounded  placeholder:text-gray-200 resize-none overflow-hidden min-h-10 bg-transparent text-gray-800"
                             value={block.content}
                             onChange={(e) => {
                               updateBlock(block.id, e.target.value);
@@ -160,7 +145,7 @@ const CreatePostPage=()=>{
                           <input 
                             type="text"
                             placeholder="Section Heading"
-                            className="w-full text-2xl font-bold font-serif border-none focus:ring-0 placeholder:text-gray-200 bg-transparent text-black"
+                            className="w-full text-2xl font-bold font-serif border-none focus:ring-3 focus:p-4 focus:ring-gray-300 focus:rounded placeholder:text-gray-200 bg-transparent text-black"
                             value={block.content}
                             onChange={(e) => updateBlock(block.id, e.target.value)}
                           />
@@ -169,7 +154,7 @@ const CreatePostPage=()=>{
                           <input 
                             type="text"
                             placeholder="Sub-heading"
-                            className="w-full text-xl font-bold font-serif text-gray-700 border-none focus:ring-0 placeholder:text-gray-200 bg-transparent"
+                            className="w-full text-xl font-bold font-serif text-gray-700 border-none focus:ring-3 focus:p-4 focus:ring-gray-300 focus:rounded  placeholder:text-gray-200 bg-transparent"
                             value={block.content}
                             onChange={(e) => updateBlock(block.id, e.target.value)}
                           />
@@ -212,7 +197,7 @@ const CreatePostPage=()=>{
                             <span className="text-gray-300 mt-2 mr-4">•</span>
                             <textarea 
                               placeholder="List items (one per line)..."
-                              className="w-full text-xl font-serif border-none focus:ring-0 placeholder:text-gray-200 resize-none overflow-hidden min-h-10 bg-transparent text-gray-800"
+                              className="w-full text-xl font-serif border-none focus:ring-3 focus:p-4 focus:ring-gray-300 focus:rounded  placeholder:text-gray-200 resize-none overflow-hidden min-h-10 bg-transparent text-gray-800"
                               value={block.content}
                               onChange={(e) => {
                                 updateBlock(block.id, e.target.value);
@@ -222,20 +207,7 @@ const CreatePostPage=()=>{
                             />
                           </div>
                         )}
-                        {block.type === 'table' && (
-                          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                            <textarea 
-                              placeholder="Name, Role, Location&#10;Alice, Designer, NY"
-                              className="w-full text-base font-mono bg-transparent border-none focus:ring-0 placeholder:text-gray-300 resize-none overflow-hidden min-h-20"
-                              value={block.content}
-                              onChange={(e) => {
-                                updateBlock(block.id, e.target.value);
-                                e.target.style.height = 'auto';
-                                e.target.style.height = e.target.scrollHeight + 'px';
-                              }}
-                            />
-                          </div>
-                        )}
+                        
                       </div>
                     </div>
                   ))}
@@ -253,12 +225,15 @@ const CreatePostPage=()=>{
                     <button onClick={() => addBlock('list')} className="flex items-center space-x-2 px-3 py-1.5 hover:bg-gray-50 rounded-full text-sm text-gray-500 hover:text-black transition">
                       <List className="w-4 h-4" /> <span>List</span>
                     </button>
-                    <button onClick={() => addBlock('table')} className="flex items-center space-x-2 px-3 py-1.5 hover:bg-gray-50 rounded-full text-sm text-gray-500 hover:text-black transition">
-                      <TableIcon className="w-4 h-4" /> <span>Table</span>
-                    </button>
                     <button onClick={() => addBlock('image')} className="flex items-center space-x-2 px-3 py-1.5 hover:bg-gray-50 rounded-full text-sm text-gray-500 hover:text-black transition">
                       <ImageIcon className="w-4 h-4" /> <span>Image</span>
                     </button>
+                    <button 
+                  onClick={handlePublish}
+                  className="bg-green-600 text-white px-3 py-1 rounded-full font-normal hover:bg-green-700 transition"
+                >
+                  Publish
+                </button>
                   </div>
                 </div>
               </div>
