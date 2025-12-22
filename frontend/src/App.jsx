@@ -7,8 +7,8 @@ import HomePage from './pages/home';
 
 
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { useClerk, useUser } from '@clerk/clerk-react';
-import { useEffect } from 'react';
+import { useAuth, useClerk, useUser } from '@clerk/clerk-react';
+import { useEffect, useState } from 'react';
 
 
  function ProtectedRoute({ children }) {
@@ -17,6 +17,28 @@ import { useEffect } from 'react';
   const navigate = useNavigate();
 
   const location = useLocation();
+
+  const { getToken } = useAuth();
+  console.log(getToken)
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const syncUser = async () => {
+      console.log("Syncing user...");  
+      const token = await getToken(); // Clerk session token
+      const res = await fetch("http://localhost:5000/api/auth/user", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      setUser(data.user);
+    };
+
+    syncUser();
+  }, [getToken]);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
