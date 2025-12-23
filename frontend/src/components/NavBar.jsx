@@ -1,12 +1,27 @@
-import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth, UserButton, useUser } from "@clerk/clerk-react";
 import { Bell, Plus } from "lucide-react";
-import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSignup } from "../hooks/useSignup";
+import { useEffect } from "react";
 
 
 const NavBar=()=>{
   const {pathname} = useLocation();
   const navigate = useNavigate();
+  const {syncUser} = useSignup();
+  const {getToken} = useAuth(); 
+  const { isSignedIn, isLoaded } = useUser();
+
+  const synchronizeUser = async () => {
+    const token = await getToken();
+    await syncUser(token);
+  };
+
+  useEffect(()=>{
+    if(isSignedIn && isLoaded){
+      synchronizeUser();
+    }
+  },[isSignedIn,isLoaded]);
   
   
   

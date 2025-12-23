@@ -4,63 +4,56 @@ import NavBar from './components/NavBar';
 import Main from './pages/main';
 import Article from './pages/article';
 import HomePage from './pages/home';
+import { useSignup } from "./hooks/useSignup";
 
 
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, useClerk, useUser } from '@clerk/clerk-react';
 import { useEffect, useState } from 'react';
+import { useAuthContext } from './context/authContext';
 
 
  function ProtectedRoute({ children }) {
-  const { isSignedIn, isLoaded } = useUser();
-  const { openSignIn } = useClerk();
-  const navigate = useNavigate();
+  const {user} = useAuthContext();
+  if(!user){
+    const {syncUser,loading} = useSignup();
 
-  const location = useLocation();
+    const { isSignedIn, isLoaded } = useUser();
+    const { openSignIn } = useClerk();
+    const navigate = useNavigate();
+    const { getToken } = useAuth();
 
-  const { getToken } = useAuth();
-  console.log(getToken)
-  const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const syncUser = async () => {
-      console.log("Syncing user...");  
-      const token = await getToken(); // Clerk session token
-      const res = await fetch("http://localhost:5000/api/auth/user", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await res.json();
-      setUser(data.user);
+    const synchronizeUser = async () => {
+      const token = await getToken();
+      await syncUser(token);
     };
+    useEffect(() => {
+      if (isLoaded && !isSignedIn) {
+        openSignIn({
+          mode: "modal",
 
-    syncUser();
-  }, [getToken]);
+          // If user closes the modal → go back
+          onClose: () => {
+            navigate(-1);          
+          },
 
-  useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      openSignIn({
-        mode: "modal",
+        });
+      }
+      if(isLoaded && isSignedIn){
+        synchronizeUser();
+      }
+    }, [isLoaded, isSignedIn, openSignIn, navigate,]);
 
-        // If user closes the modal → go back
-        onClose: () => {
-          navigate(-1);
-        },
+    if (!isLoaded) return <Navigate to="/" />;
 
-      });
-    }
-  }, [isLoaded, isSignedIn, openSignIn, navigate,]);
-
-  if (!isLoaded) return <Navigate to="/" />;
-
-  // Block page access while modal is open
-  if (!isSignedIn) return <Navigate to="/" />;;
+    // Block page access while modal is open
+    if (!isSignedIn) <Navigate to="/" />
+  }
 
   return children;
 }
+
 
 const App = () => {
   
