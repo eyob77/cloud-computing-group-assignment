@@ -8,7 +8,24 @@
       "readTime": "8 min read",
       "category": "Design",
       "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=200&h=200",
-      "content": "<p class='font-serif text-xl mb-6'>In the past decade, we've moved from static style guides to living design systems. But as we enter the era of AI, the very definition of a 'component' is changing.</p><p class='font-serif text-xl mb-6'>Imagine a system that doesn't just provide a button, but understands the context of the user's intent and generates the perfect interaction pattern in real-time. This isn't science fiction anymore.</p><h2 class='text-2xl font-bold mt-8 mb-4 font-serif'>The Shift from Static to Dynamic</h2><p class='font-serif text-xl mb-6'>Static systems were built for predictability. Dynamic systems are built for adaptability. When we use AI to bridge the gap between design and code, we're not just automating tasks; we're enabling a new kind of creativity.</p>"
+      "contents":[
+        {
+          "type": "paragraph",
+          "content": "In the past decade, we've moved from static style guides to living design systems. But as we enter the era of AI, the very definition of a 'component' is changing."
+        },
+        {
+          "type": "paragraph",
+          "content": "Imagine a system that doesn't just provide a button, but understands the context of the user's intent and generates the perfect interaction pattern in real-time. This isn't science fiction anymore."
+        },
+        {
+          "type": "heading",
+          "content": "The Shift from Static to Dynamic"
+        },
+        {
+          "type": "paragraph",
+          "content": "Static systems were built for predictability. Dynamic systems are built for adaptability. When we use AI to bridge the gap between design and code, we're not just automating tasks; we're enabling a new kind of creativity."
+        }
+      ]
     },
     {
       "id": 2,
@@ -19,6 +36,35 @@
       "readTime": "12 min read",
       "category": "Tech",
       "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=200&h=200",
-      "content": "<p class=\"font-serif text-xl mb-6\">The original thesis held that every industry would eventually become a software industry. Today, we see that happening in healthcare, defense, and even heavy manufacturing...</p>"
+      "contents": [
+        {
+          "type": "paragraph",
+          "content": "The original thesis held that every industry would eventually become a software industry. Today, we see that happening in healthcare, defense, and even heavy manufacturing..."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "author": "Ada Lovelace",
+      "title": "How to Build Readable Lists",
+      "description": "Practical tips for creating scannable lists in technical writing.",
+      "date": "Jan 03",
+      "readTime": "5 min read",
+      "category": "Writing",
+      "image": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=200&h=200",
+      "contents": [
+        {
+          "type": "paragraph",
+          "content": "Lists help readers scan content quickly. Here are concrete tips:"
+        },
+        {
+          "type": "list",
+          "content": "Use short, punchy lines\nStart each item with a strong word\nKeep items parallel in structure\nAvoid overloading with subclauses"
+        },
+        {
+          "type": "paragraph",
+          "content": "Following these rules will make your content easier to digest."
+        }
+      ]
     }
   ]

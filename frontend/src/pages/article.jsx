@@ -2,6 +2,7 @@ import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import mockData from "../mockData.json"
+import { Heading, Image, List, Subheading, Text } from "../components/articleComponents";
 
 const Article=()=>{
   const {id} = useParams();
@@ -13,6 +14,7 @@ const Article=()=>{
     const handleBack = () => {
       navigate("/")
     };
+    console.log(selectedPost)
   return (
     <div className="max-w-2xl mx-auto px-4">
             <button 
@@ -44,8 +46,25 @@ const Article=()=>{
 
             <div 
               className="font-serif text-xl leading-relaxed text-gray-800 space-y-6 article-content"
-              dangerouslySetInnerHTML={{ __html: selectedPost.content }}
-            />
+              // dangerouslySetInnerHTML={{ __html: selectedPost.contents }}
+            >
+              {selectedPost.contents.map((content,index)=>{
+                switch(content.type){
+                  case "heading":
+                    return <Heading key={index} content={content.content} />;
+                  case "subheading":
+                    return <Subheading key={index} content={content.content} />;  
+                  case "image":
+                    return <Image key={index} content={content.content} />;
+                  case "list":
+                    return <List key={index} content={content.content} />;
+                  case "paragraph":
+                    return <Text key={index} content={content.content} />;
+                  default:
+                    return null;
+                }
+              })}
+            </div>
           </div>
   )
 }
