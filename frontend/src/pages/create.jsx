@@ -13,13 +13,23 @@ const CreatePostPage = () => {
   });
 
   const addBlock = (type) => {
-    const newBlock = {
-      id: Date.now().toString(),
-      type,
-      content: type === "image" ? "" : type === "table" ? "Header 1, Header 2\nRow 1 Col 1, Row 1 Col 2" : ""
-    };
-    setNewPost((prev) => ({ ...prev, blocks: [...prev.blocks, newBlock] }));
+    const id = Date.now().toString();
+
+    setNewPost((prev) => ({
+      ...prev,
+      blocks: [
+        ...prev.blocks,
+        {
+          id,
+          type,
+          content: "",
+          imageId: type === "image" ? `image-${id}` : null,
+          file: null
+        }
+      ]
+    }));
   };
+
 
   const updateBlock = (id, updates) => {
     setNewPost((prev) => ({
@@ -56,68 +66,150 @@ const CreatePostPage = () => {
     e.target.value = "";
   };
 
-  const handlePublish = async () => {
-    if (!newPost.title) return;
+  // const handlePublish = async () => {
+  //   if (!newPost.title) return;
 
-    const formData = new FormData();
-    const contents = [];
-    let currentListItems = [];
+  //   const formData = new FormData();
+  //   const contents = [];
+  //   let currentListItems = [];
 
-    newPost.blocks.forEach((block, index) => {
-      if ((!block.content || block.content.trim() === "") && !block.file) return;
+  //   newPost.blocks.forEach((block, index) => {
+  //     if ((!block.content || block.content.trim() === "") && !block.file) return;
 
-      // List block handling
-      if (block.type === "list") {
-        currentListItems.push(block.content.trim());
-        return;
-      }
+  //     // List block handling
+  //     if (block.type === "list") {
+  //       currentListItems.push(block.content.trim());
+  //       return;
+  //     }
 
-      // Flush collected list items
-      if (currentListItems.length) {
-        contents.push({ type: "list", content: currentListItems.join("\n") });
-        currentListItems = [];
-      }
+  //     // Flush collected list items
+  //     if (currentListItems.length) {
+  //       contents.push({ type: "list", content: currentListItems.join("\n") });
+  //       currentListItems = [];
+  //     }
 
-      // Image block handling
-      if (block.type === "image") {
-        contents.push({ type: "image", imageIndex: index }); // placeholder
-        if (block.file) formData.append("images", block.file); // attach file
-        return;
-      }
+  //     // Image block handling
+  //     if (block.type === "image") {
+  //       contents.push({ type: "image", imageIndex: index }); // placeholder
+  //       if (block.file) formData.append("images", block.file); // attach file
+  //       return;
+  //     }
 
-      // All other blocks
-      contents.push({
-        type: block.type === "text" ? "paragraph" : block.type,
-        content: block.content
-      });
-    });
+  //     // All other blocks
+  //     contents.push({
+  //       type: block.type === "text" ? "paragraph" : block.type,
+  //       content: block.content
+  //     });
+  //   });
 
-    // Flush remaining list items
-    if (currentListItems.length) {
-      contents.push({ type: "list", content: currentListItems.join("\n") });
-    }
+  //   // Flush remaining list items
+  //   if (currentListItems.length) {
+  //     contents.push({ type: "list", content: currentListItems.join("\n") });
+  //   }
 
-    // Append post JSON
-    const postData = {
-      title: newPost.title,
-      description: newPost.description,
-      category: newPost.category,
-      contents
-    };
-    console.log(postData)
-    formData.append("post", JSON.stringify(postData));
+  //   // Append post JSON
+  //   const postData = {
+  //     title: newPost.title,
+  //     description: newPost.description,
+  //     category: newPost.category,
+  //     contents
+  //   };
+  //   console.log(postData)
+  //   formData.append("post", JSON.stringify(postData));
 
 
-      // Reset editor
-      setNewPost({
-        title: "",
-        description: "",
-        blocks: [{ id: Date.now().toString(), type: "text", content: "" }],
-        category: "Draft"
-      });
+  //     // Reset editor
+  //     setNewPost({
+  //       title: "",
+  //       description: "",
+  //       blocks: [{ id: Date.now().toString(), type: "text", content: "" }],
+  //       category: "Draft"
+  //     });
       
 
-    };
+  //   };
+
+  const handlePublish = async () => {
+  if (!newPost.title) return;
+
+  const formData = new FormData();
+  const contents = [];
+  let currentListItems = [];
+
+  newPost.blocks.forEach((block) => {
+    if ((!block.content || block.content.trim() === "") && !block.file) return;
+
+    // Handle lists
+    if (block.type === "list") {
+      currentListItems.push(block.content.trim());
+      return;
+    }
+
+    if (currentListItems.length) {
+      contents.push({
+        type: "list",
+        content: currentListItems.join("\n")
+      });
+      currentListItems = [];
+    }
+
+    // Handle image blocks
+    if (block.type === "image") {
+      contents.push({
+        type: "image",
+        imageId: block.imageId
+      });
+
+      if (block.file) {
+        formData.append("images", block.file, block.imageId);
+      }
+
+      return;
+    }
+
+    // All other blocks
+    contents.push({
+      type: block.type === "text" ? "paragraph" : block.type,
+      content: block.content
+    });
+  });
+
+  if (currentListItems.length) {
+    contents.push({
+      type: "list",
+      content: currentListItems.join("\n")
+    });
+  }
+
+  const postData = {
+    title: newPost.title,
+    description: newPost.description,
+    category: newPost.category,
+    contents
+  };
+
+  formData.append("post", JSON.stringify(postData));
+
+  // SEND TO BACKEND
+  await fetch("http://localhost:3000/api/post/create", {
+  method: "POST",
+  body: formData,
+  credentials: "include",
+});
+
+  for (const [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+
+  // Reset editor
+  setNewPost({
+    title: "",
+    description: "",
+    blocks: [{ id: Date.now().toString(), type: "text", content: "" }],
+    category: "Draft"
+  });
+};
+
   
 
   return (
