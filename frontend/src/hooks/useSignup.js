@@ -5,6 +5,8 @@ export const useSignup =  ()=>{
   const [loading,setLoading] = useState(false);
   const {setUser} = useAuthContext();
   const syncUser = async(token)=>{
+    const URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
     if(!token){
       return;
     }
@@ -12,7 +14,7 @@ export const useSignup =  ()=>{
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/user", {
+      const res = await fetch(`${URL}/api/auth/user`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

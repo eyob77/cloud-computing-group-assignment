@@ -6,9 +6,11 @@ export const useGetPosts = ()=>{
 
     const getPosts = async () =>{
         setLoading(true);
+         const URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 
         try {
-            const res = await fetch("http://localhost:3000/api/post");
+            const res = await fetch(`${URL}/api/post`);
 
             const data = await res.json();
             if (data.error) {
