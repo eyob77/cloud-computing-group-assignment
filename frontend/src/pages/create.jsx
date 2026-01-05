@@ -1,9 +1,14 @@
 import { Heading, ImageIcon, List, TextQuote, Trash2, Type, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { useCreatePost } from "../hooks/useCreatePost";
+import { useAuthContext } from "../context/authContext";
 
 const CreatePostPage = () => {
   const fileInputRef = useRef(null);
   const [activeUploadBlock, setActiveUploadBlock] = useState(null);
+
+  const {createPost,loading} = useCreatePost();
+  const {user} = useAuthContext()
 
   const [newPost, setNewPost] = useState({
     title: "",
@@ -59,7 +64,7 @@ const CreatePostPage = () => {
 
     updateBlock(activeUploadBlock, {
       file,
-      content: URL.createObjectURL(file) // preview only
+      content: URL.createObjectURL(file)
     });
 
     setActiveUploadBlock(null);
@@ -130,90 +135,91 @@ const CreatePostPage = () => {
   //   };
 
   const handlePublish = async () => {
-  if (!newPost.title) return;
+    if (!newPost.title) return;
 
-  const formData = new FormData();
-  const contents = [];
-  let currentListItems = [];
+    const formData = new FormData();
+    const contents = [];
+    let currentListItems = [];
 
-  newPost.blocks.forEach((block) => {
-    if ((!block.content || block.content.trim() === "") && !block.file) return;
+    newPost.blocks.forEach((block) => {
+      if ((!block.content || block.content.trim() === "") && !block.file) return;
 
-    // Handle lists
-    if (block.type === "list") {
-      currentListItems.push(block.content.trim());
-      return;
-    }
-
-    if (currentListItems.length) {
-      contents.push({
-        type: "list",
-        content: currentListItems.join("\n")
-      });
-      currentListItems = [];
-    }
-
-    // Handle image blocks
-    if (block.type === "image") {
-      contents.push({
-        type: "image",
-        imageId: block.imageId
-      });
-
-      if (block.file) {
-        formData.append("images", block.file, block.imageId);
+      // Collect list items
+      if (block.type === "list") {
+        currentListItems.push(block.content.trim());
+        return;
       }
 
-      return;
+      // Flush list items when encountering a non-list block
+      if (currentListItems.length) {
+        contents.push({ type: "list", content: currentListItems.join("\n") });
+        currentListItems = [];
+      }
+
+      // Image blocks: set content to imageId so server can map uploaded files
+      if (block.type === "image") {
+        contents.push({ type: "image", content: block.imageId || block.id });
+        if (block.file) {
+          formData.append("images", block.file, block.imageId || block.id);
+        }
+        return;
+      }
+
+      // Map editor types to schema types (text -> paragraph)
+      contents.push({ type: block.type === "text" ? "paragraph" : block.type, content: block.content });
+    });
+
+    if (currentListItems.length) {
+      contents.push({ type: "list", content: currentListItems.join("\n") });
     }
 
-    // All other blocks
-    contents.push({
-      type: block.type === "text" ? "paragraph" : block.type,
-      content: block.content
-    });
-  });
+    // Build required post metadata to match Mongoose schema
+    const date = new Date().toISOString();
 
-  if (currentListItems.length) {
-    contents.push({
-      type: "list",
-      content: currentListItems.join("\n")
-    });
-  }
+    // Estimate readTime (200 wpm)
+    const totalWords = contents.reduce((acc, c) => {
+      if (!c.content) return acc;
+      return acc + c.content.split(/\s+/).filter(Boolean).length;
+    }, 0);
+    const minutes = Math.max(1, Math.ceil(totalWords / 200));
+    const readTime = `${minutes} min`;
 
-  const postData = {
-    title: newPost.title,
-    description: newPost.description,
-    category: newPost.category,
-    contents
+    // Use first image content (imageId) as post image if available
+    const firstImage = contents.find((c) => c.type === "image");
+    const image = firstImage ? firstImage.content : "";
+
+    const postData = {
+      author: user?.email || "",
+      title: newPost.title,
+      description: newPost.description,
+      date,
+      readTime,
+      category: newPost.category,
+      image,
+      contents
+    };
+
+    formData.append("post", JSON.stringify(postData));
+
+    await createPost(formData);
+
+    for (const [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
+    setNewPost({
+      title: "",
+      description: "",
+      blocks: [{ id: Date.now().toString(), type: "text", content: "" }],
+      category: "Draft"
+    });
   };
-
-  formData.append("post", JSON.stringify(postData));
-
-  // SEND TO BACKEND
-  await fetch("http://localhost:3000/api/post/create", {
-  method: "POST",
-  body: formData,
-  credentials: "include",
-});
-
-  for (const [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
-
-  // Reset editor
-  setNewPost({
-    title: "",
-    description: "",
-    blocks: [{ id: Date.now().toString(), type: "text", content: "" }],
-    category: "Draft"
-  });
-};
 
   
 
   return (
-    <div className="max-w-2xl mx-auto px-4 mt-10">
+    <div className="max-w-2xl mx-auto px-4 mt-10 relative">
+      {loading ? <div className="fixed top-0 left-0 text-center w-full h-full z-100 opacity-50">Loading...</div> : null}
       <input
         ref={fileInputRef}
         type="file"
@@ -369,6 +375,7 @@ const CreatePostPage = () => {
           <button
             onClick={handlePublish}
             className="bg-green-600 text-white px-3 py-1 rounded-full font-normal hover:bg-green-700 transition"
+            disabled={loading}
           >
             Publish
           </button>
