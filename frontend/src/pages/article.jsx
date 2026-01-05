@@ -3,18 +3,30 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import mockData from "../mockData.json"
 import { Heading, Image, List, Subheading, Text } from "../components/articleComponents";
+import { useGetPostById } from "../hooks/useGetPostById";
 
 const Article=()=>{
   const {id} = useParams();
   const navigate = useNavigate();
+  const [selectedPost, setSelectedPost] = useState(null);
+
+  const {loading,getPostById} = useGetPostById();
+
+  useEffect(()=>{
+    const fetchPost = async ()=>{
+      const post = await getPostById(id);
+      setSelectedPost(post);
+    }
+
+    fetchPost();
+  },[getPostById])
   
-  const selectedPost = mockData.find(d=> d.id.toString() === "3");
+  // const selectedPost = mockData.find(d=> d.id.toString() === "3");
 
-
+    console.log(selectedPost)
     const handleBack = () => {
       navigate("/")
     };
-    console.log(selectedPost)
   return (
     <div className="max-w-2xl mx-auto px-4">
             <button 
@@ -27,18 +39,18 @@ const Article=()=>{
             
             <header className="mb-10">
               <h1 className="text-4xl md:text-5xl font-bold font-serif leading-tight mb-4 text-black">
-                {selectedPost.title}
+                {selectedPost?.title}
               </h1>
               <p className="text-xl text-gray-500 font-serif italic mb-8">
-                {selectedPost.description}
+                {selectedPost?.description}
               </p>
               
               <div className="flex items-center justify-between py-6 border-y border-gray-100">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
                   <div className="text-sm">
-                    <p className="font-bold text-black">{selectedPost.author}</p>
-                    <p className="text-gray-500">{selectedPost.readTime} · {selectedPost.date}</p>
+                    <p className="font-bold text-black">{selectedPost?.author}</p>
+                    <p className="text-gray-500">{selectedPost?.readTime} · {selectedPost?.date}</p>
                   </div>
                 </div>
               </div>
@@ -48,14 +60,14 @@ const Article=()=>{
               className="font-serif text-xl leading-relaxed text-gray-800 space-y-6 article-content"
               // dangerouslySetInnerHTML={{ __html: selectedPost.contents }}
             >
-              {selectedPost.contents.map((content,index)=>{
+              {selectedPost?.contents.map((content,index)=>{
                 switch(content.type){
                   case "heading":
                     return <Heading key={index} content={content.content} />;
                   case "subheading":
                     return <Subheading key={index} content={content.content} />;  
                   case "image":
-                    return <Image key={index} content={content.content} />;
+                    return <Image key={index} content={content.url} />;
                   case "list":
                     return <List key={index} content={content.content} />;
                   case "paragraph":
