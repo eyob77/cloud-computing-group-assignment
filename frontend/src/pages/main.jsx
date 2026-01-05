@@ -1,18 +1,34 @@
 import { useEffect, useState } from "react";
 import mockData from "../mockData.json"
 import { useNavigate } from "react-router-dom";
+import { useGetPosts } from "../hooks/useGetPosts";
 
-const Main =()=>{
+const Main = () => {
 
-    const navigate = useNavigate();
-    const defaultPosts = mockData;
-    const [posts, setPosts] = useState(() => {
-        return defaultPosts;
-      });
+  const navigate = useNavigate();
+  const defaultPosts = mockData;
+  const { getPosts } = useGetPosts();
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchPosts = async () => {
+      try {
+        const result = await getPosts();
+        if (mounted && Array.isArray(result)) setPosts(result);
+      } catch (err) {
+        console.error("Failed to load posts:", err);
+      }
+    };
+    fetchPosts();
+    return () => {
+      mounted = false;
+    };
+  }, [getPosts]);
 
 
     const handlePostClick = (post) => {
-        navigate("/article/" + post.id);
+        navigate("/article/" + post._id);
         window.scrollTo(0, 0);
     };
     return (
@@ -24,9 +40,11 @@ const Main =()=>{
                 </div>
               ) : posts.map(post => (
                 <div key={post.id} className="flex justify-between items-start group">
-                  <div className="flex-1 pr-8">
+                  <div className="flex-1 pr-8"> 
                     <div className="flex items-center space-x-2 mb-2">
-                      <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
+                      <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center">
+                        <span>{post.author.charAt(0)}</span>
+                      </div>
                       <span className="text-sm font-medium">{post.author}</span>
                     </div>
                     <h2 

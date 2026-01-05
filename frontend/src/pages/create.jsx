@@ -219,7 +219,7 @@ const CreatePostPage = () => {
 
   return (
     <div className="max-w-2xl mx-auto px-4 mt-10 relative">
-      {loading ? <div className="fixed top-0 left-0 text-center w-full h-full z-100 opacity-50">Loading...</div> : null}
+      {loading && <div className="fixed top-0 left-0 text-center w-full h-full z-100 opacity-50">Loading...</div>}
       <input
         ref={fileInputRef}
         type="file"

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 
 export const useCreatePost = () => {
@@ -19,9 +20,9 @@ export const useCreatePost = () => {
                 throw new Error(data.error);
             }
             setLoading(false);
-            console.log("Post created successfully:", data);
+            toast.success(data.message);
         } catch (error) {
-            console.log("error creating post:", error);
+            toast.error(error);
             setLoading(false);
         }finally{
             setLoading(false);

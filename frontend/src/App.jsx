@@ -6,6 +6,8 @@ import Article from './pages/article';
 import HomePage from './pages/home';
 import { useSignup } from "./hooks/useSignup";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, useClerk, useUser } from '@clerk/clerk-react';
@@ -16,7 +18,7 @@ import { useAuthContext } from './context/authContext';
  function ProtectedRoute({ children }) {
   const {user} = useAuthContext();
   if(!user){
-    const {syncUser,loading} = useSignup();
+    const {syncUser} = useSignup();
 
     const { isSignedIn, isLoaded } = useUser();
     const { openSignIn } = useClerk();
@@ -85,6 +87,7 @@ const App = () => {
         th, td { padding: 0.75rem 0.5rem; text-align: left; }
         textarea::placeholder, input::placeholder { color: #e5e7eb; }
       `}</style>
+      <ToastContainer />
     </div>
   );
 };

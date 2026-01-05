@@ -37,7 +37,7 @@ const NavBar=()=>{
               className="text-2xl font-bold tracking-tighter cursor-pointer font-serif"
               onClick={handleBack}
             >
-              Medium
+              Cloudium
             </h1>
           </div>
           
