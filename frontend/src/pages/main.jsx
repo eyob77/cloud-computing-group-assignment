@@ -33,7 +33,6 @@ const Main = () => {
     };
     return (
         <div className="max-w-5xl mx-auto px-4">
-          {loading && <div className="fixed top-0 left-0 w-full h-full bg-white z-50 flex items-center justify-center opacity-75">loading...</div>}
             <div className="max-w-2xl mx-auto space-y-12">
               {posts.length === 0 ? (
                 <div className="text-center py-20 text-gray-400 font-serif">
